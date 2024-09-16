@@ -1,4 +1,4 @@
-import db from "../db/knex"; // Adjust path to knex.ts
+import db from "../../db/knex"; // Adjust path to knex.ts
 
 const isEmail = (userName: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

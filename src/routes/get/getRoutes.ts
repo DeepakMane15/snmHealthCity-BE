@@ -1,9 +1,9 @@
 import express from "express";
-import AuthController from "../../controllers/auth/authController";
 import authorize from "../../middlewares/authMiddleware";
+import getController from "../../controllers/get/getController";
 
 const router = express.Router();
 
-router.post("/signin", authorize, AuthController.signin);
+router.post("/", authorize, getController.GetMethod);
 
 export default router;

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import logger from "../utils/winston";
-import authService from "../services/authService";
+import logger from "../../utils/winston";
+import authService from "../../services/auth/authService";
 var jwt = require('jsonwebtoken');
 import crypto from 'crypto';
 
@@ -22,14 +22,14 @@ const signin = async (req: Request, res: Response) => {
         user_type: user.user_type
       };
       logger.info(`Sign In completed for username : ${userName}`);
-      res.status(200).json({ message: "Logged in successfully", data: data });
+      res.status(200).json({ status: true, message: "Logged in successfully", data: data });
     } else {
       logger.debug(`Invalid username or password : ${userName}`);
-      res.status(400).json({ message: "Invalid username or password" });
+      res.status(400).json({ status: false,  message: "Invalid username or password" });
     }
   } catch (error) {
     logger.error(`Error signin in: - ${error}`);
-    res.status(500).json({ error: "An error occurred while signing in" });
+    res.status(500).json({ status: false, message: "An error occurred while signing in" });
   }
 };
 
