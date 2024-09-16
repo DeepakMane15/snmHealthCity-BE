@@ -7,6 +7,7 @@ import crypto from 'crypto';
 const signin = async (req: Request, res: Response) => {
   try {
     const { userName, password } = req.body;
+    logger.info(`Sign In start for username : ${userName}`);
     let hashedPassword = hashPassword(password);
     const user = await authService.signin(userName, hashedPassword);
     if (user) {
@@ -20,8 +21,10 @@ const signin = async (req: Request, res: Response) => {
         avatar: user.avatar,
         user_type: user.user_type
       };
+      logger.info(`Sign In completed for username : ${userName}`);
       res.status(200).json({ message: "Logged in successfully", data: data });
     } else {
+      logger.debug(`Invalid username or password : ${userName}`);
       res.status(400).json({ message: "Invalid username or password" });
     }
   } catch (error) {
