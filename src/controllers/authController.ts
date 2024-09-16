@@ -15,7 +15,7 @@ const signin = async (req: Request, res: Response) => {
         token: jwt.sign(user, process.env.SECRET_KEY, { algorithm: 'HS256' }),
         type: user.user_type,
         username: user.username,
-        name: user.firstName + " " + user.lastName,
+        name: user.first_name + " " + user.last_name,
         id: user.id,
         cellphone: user.cell_number,
         avatar: user.avatar,
