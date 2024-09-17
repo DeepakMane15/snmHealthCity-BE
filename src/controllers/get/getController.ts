@@ -11,8 +11,7 @@ const GetMethod = async (req: Request, res: Response) => {
     let result:any = [];
     logger.info(`Get Method start for type : ${type}`);
     if(type === '10') {
-      result["counts"] = await getService.GetMethod(req.body);
-      result["request"] = await getService.GetMethod({type:'6'});
+      result = await getDashboardData();
     }
     else {
     result = await getService.GetMethod(req.body);
@@ -24,6 +23,15 @@ const GetMethod = async (req: Request, res: Response) => {
     res.status(500).json({ status: false, message: "An error occurred while getting results" });
   }
 };
+
+const getDashboardData = async () => {
+  let result = {
+    counts: await getService.GetMethod({type:'10'}),
+    request: await getService.GetMethod({type:'6'})
+  }
+
+  return [result];
+}
 
 const GetByIdMethod = async (req: Request, res: Response) => {
     try {
