@@ -8,8 +8,15 @@ import getService from "../../services/get/getService";
 const GetMethod = async (req: Request, res: Response) => {
   try {
     const { type } = req.body;
+    let result:any = [];
     logger.info(`Get Method start for type : ${type}`);
-    const result = await getService.GetMethod(req.body);
+    if(type === '10') {
+      result["counts"] = await getService.GetMethod(req.body);
+      result["request"] = await getService.GetMethod({type:'6'});
+    }
+    else {
+    result = await getService.GetMethod(req.body);
+    }
       logger.info(`Get Method Completed for type : ${type}`);
       res.status(200).json({ status: true, message: "Get successfully", data: result });
   } catch (error) {

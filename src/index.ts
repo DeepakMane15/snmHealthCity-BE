@@ -15,6 +15,6 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api', apiRoutes);
 
 
-app.listen(3300, () => {
-    console.log('Server is running on port 3300');
+app.listen(3500, () => {
+    console.log('Server is running on port 3500');
 });
