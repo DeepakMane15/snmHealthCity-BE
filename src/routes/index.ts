@@ -5,7 +5,7 @@ import getRoutes from './get/getRoutes';
 import getByIdRoutes from './getById/getByIdRoutes';
 import saveRoutes from './save/saveRoutes';
 import editRoutes from './edit/editRoutes';
-
+import deleteRoutes from './delete/deleteRoutes';
 
 const router = Router();
 
@@ -18,6 +18,7 @@ router.use('/snm-get', getRoutes);
 router.use('/snm-get-by-id', getByIdRoutes);
 router.use('/snm-save', saveRoutes);
 router.use('/snm-edit', editRoutes);
+router.use('/common-delete', deleteRoutes);
 
 
 export default router;

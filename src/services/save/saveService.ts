@@ -10,8 +10,6 @@ const saveMethod = async (input: any, pic = "") => {
             driver_name: input.driver_name,
             expense_for: input.expense_for,
             last_reading: input.last_reading,
-            rate: input.rate,
-            qty: input.qty,
             is_challan: input.is_challan,
             challan_type: input.challan_type,
             other_challan: input.other_challan,

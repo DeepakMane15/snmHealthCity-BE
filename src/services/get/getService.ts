@@ -8,6 +8,7 @@ const GetMethod = async (input :any) => {
         res = await db('snm_driver')
             .select('*', db.raw('CONCAT(first_name, " ", last_name) AS full_name'))
             .where('is_active', 1)
+            .where('isDeleted', 0)
             .orderBy('id', 'desc');
     }
     else if (input.type === '2') {
@@ -15,12 +16,14 @@ const GetMethod = async (input :any) => {
             .select('v.*', 'a.reading', 'a.total_fuel')
             .leftJoin('snm_vehicle_average as a', 'a.vehicle', 'v.id')
             .where('v.is_active', 1)
+            .where('isDeleted',0)
             .groupBy('v.id')
             .orderBy('v.id', 'desc');
     }
     else if (input.type === '3') {
         res = await db('snm_fuel_inward')
             .select('*')
+            .where('isDeleted', 0)
             .orderBy('id', 'desc');
     }
     else if (input.type === '4') {
@@ -33,6 +36,7 @@ const GetMethod = async (input :any) => {
                     queryBuilder.where('driver_name', input.driver_id);
                 }
             })
+            .where('i.isDeleted', 0)
             .groupBy('i.id')
             .orderBy('i.id', 'desc');
     }
@@ -46,6 +50,7 @@ const GetMethod = async (input :any) => {
     else if (input.type === '6') {
         res = await db('snm_prerequest')
             .select('*')
+            .where('isDeleted', 0)
             .orderBy('id', 'desc');
     }
     else if (input.type === '7') {
@@ -87,19 +92,21 @@ const GetByIdMethod = async (input: any) => {
 
     if (input.type === '1') {
         res = await db('snm_driver')
-            .where({ is_active: 1, id: input.id })
+            .where({ is_active: 1, id: input.id, isDeleted: 0 })
             .first();
     } 
     else if (input.type === '2') {
         res = await db('vehicle')
-            .where({ is_active: 1 });
+            .where({ is_active: 1, isDeleted: 0 });
     } 
     else if (input.type === '3') {
         res = await db('snm_fuel_inward')
-            .select('*');
+            .select('*')
+            .where('isDeleted', 0);
     } 
     else if (input.type === '4') {
         res = await db('impressed_ac')
+        .where('isDeleted',0)
             .select('*');
     } 
     else if (input.type === '5') {
@@ -108,7 +115,8 @@ const GetByIdMethod = async (input: any) => {
     } 
     else if (input.type === '6') {
         res = await db('snm_prerequest')
-            .select('*');
+            .select('*')
+            .where('isDeleted', 0);
     } 
     else if (input.type === '7') {
         res = await db('snm_spareparts')
