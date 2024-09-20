@@ -5,11 +5,14 @@ const GetMethod = async (input :any) => {
     let res = [];
 
     if (input.type === '1') {
-        res = await db('snm_driver')
+        let query = db('snm_driver')
             .select('*', db.raw('CONCAT(first_name, " ", last_name) AS full_name'))
             .where('is_active', 1)
             .where('isDeleted', 0)
-            .orderBy('id', 'desc');
+            if(input.selectedType && input.selectedType !== '0') {
+                query.where({status: input.selectedType});
+            }
+            res = await query.orderBy('id', 'desc');
     }
     else if (input.type === '2') {
         res = await db('vehicle as v')
@@ -48,10 +51,20 @@ const GetMethod = async (input :any) => {
             .orderBy('s.id', 'desc');
     }
     else if (input.type === '6') {
-        res = await db('snm_prerequest')
-            .select('*')
-            .where('isDeleted', 0)
-            .orderBy('id', 'desc');
+
+        let query = db('snm_prerequest')
+            .select('*');
+
+            if(input.selectedType && input.selectedType !== '0' && input.selectedType !== 'deleted') {
+                query.where('status', input.selectedType)
+            }
+            // if(input.selectedType &&  input.selectedType === 'deleted') {
+            //     query.where('isDeleted', 1);
+            // }
+            // else {
+            //     query.where('isDeleted', 0);
+            // }
+            res = await query.orderBy('id', 'desc');
     }
     else if (input.type === '7') {
         res = await db('snm_spareparts as i')

@@ -108,8 +108,10 @@ const saveMethod = async (input: any, pic = "") => {
         data = {
             name: input.name,
             date: input.date,
+            time: input.time,
             pickup: input.pickup,
             phone: input.phone,
+            mode: input.mode,
             destination: input.destination
         };
         res = await db('snm_prerequest').insert(data);

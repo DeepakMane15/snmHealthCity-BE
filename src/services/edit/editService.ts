@@ -112,8 +112,10 @@ const editMethod = async (input: any) => {
         data = {
             name: input.name,
             date: input.date,
+            time: input.time,
             pickup: input.pickup,
             phone: input.phone,
+            mode: input.mode,
             destination: input.destination
         };
         res = await db('snm_prerequest').update(data).where({ id: input.id });

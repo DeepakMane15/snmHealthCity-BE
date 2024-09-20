@@ -35,7 +35,7 @@ const deleteMethod = async (input :any) => {
     else if (input.type === '6') {
         await db('snm_prerequest')
         .where('id', input.id)
-        .update('isDeleted',1);
+        .update('status','cancelled');
     }
     else if (input.type === '7') {
         // res = await db('snm_spareparts as i')
