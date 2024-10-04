@@ -10,6 +10,7 @@ const signin = async (req: Request, res: Response) => {
     logger.info(`Sign In start for username : ${userName}`);
     let hashedPassword = hashPassword(password);
     const user = await authService.signin(userName, hashedPassword);
+    const permission = await authService.getPermission(user.id);
     if (user) {
       let data = {
         token: jwt.sign(user, process.env.SECRET_KEY, { algorithm: 'HS256' }),
@@ -19,7 +20,8 @@ const signin = async (req: Request, res: Response) => {
         id: user.id,
         cellphone: user.cell_number,
         avatar: user.avatar,
-        user_type: user.user_type
+        user_type: user.user_type,
+        permissions: permission
       };
       logger.info(`Sign In completed for username : ${userName}`);
       res.status(200).json({ status: true, message: "Logged in successfully", data: data });

@@ -30,4 +30,13 @@ const signin = async (userName: string, password: string) => {
   return await query.first();
 };
 
-export default { signin };
+const getPermission = async(userId: number) => {
+  let res = await db('user_permissions as u')
+  .select('u.title', 'u.canEdit')
+  .innerJoin('common_user_login as c', 'c.id', 'u.user_id')
+  .where('c.id', userId);
+
+  return res;
+}
+
+export default { signin, getPermission };
