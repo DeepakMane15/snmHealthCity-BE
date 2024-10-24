@@ -153,7 +153,7 @@ const GetByIdMethod = async (input: any) => {
 };
 
 const GetDeviceCordinates = async () => {
-  return await await db("device_info").select("*");
+  return  await db("device_info").select("*");
 };
 
 export default { GetMethod, GetByIdMethod, GetDeviceCordinates };
