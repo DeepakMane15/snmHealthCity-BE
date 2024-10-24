@@ -5,5 +5,7 @@ import authorize from "../../middlewares/authMiddleware";
 const router = express.Router();
 
 router.post("/signin", AuthController.signin);
+router.post("/omada-signin", AuthController.omadaSignin);
+
 
 export default router;

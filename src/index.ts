@@ -5,6 +5,13 @@ const bodyParser = require('body-parser');
 import apiRoutes from "./routes/index";
 import { swaggerSpec, swaggerUi } from './swagger'; // Import Swagger config
 var cors = require('cors')
+const axios = require("axios");
+const https = require("https");
+
+// Create an HTTPS agent that ignores self-signed certificates
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: false, // Disable SSL certificate validation
+});
 // import sadhsangatRoutes from "./routes/sadhsangatRoutes";
 // const sadhsangatRoutes = require('./routes/sadhsangatRoutes');
 app.use(cors());
