@@ -47,7 +47,13 @@ const GetByIdMethod = async (req: Request, res: Response) => {
   };
 
 
+  const GetDeviceData = async () => {
+    return await getService.GetDeviceCordinates()
+  }
+  
+
 export default {
   GetMethod,
-  GetByIdMethod
+  GetByIdMethod,
+  GetDeviceData
 };

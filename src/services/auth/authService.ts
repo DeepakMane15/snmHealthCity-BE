@@ -20,11 +20,11 @@ const signin = async (userName: string, password: string) => {
     .select("*", db.raw("user_type as type"))
     .where("password", password);
 
-  if (isEmail(userName)) {
+  // if (isEmail(userName)) {
     query = query.andWhere("username", userName);
-  } else if (isNumber(userName)) {
-    query = query.andWhere("cell_number", userName);
-  }
+  // } else if (isNumber(userName)) {
+  //   query = query.andWhere("cell_number", userName);
+  // }
 
   // Return the first result
   return await query.first();

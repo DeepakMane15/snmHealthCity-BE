@@ -4,6 +4,6 @@ import authorize from "../../middlewares/authMiddleware";
 
 const router = express.Router();
 
-router.post("/signin", authorize, AuthController.signin);
+router.post("/signin", AuthController.signin);
 
 export default router;
