@@ -217,7 +217,7 @@ const HandleDisconnectedDevice = async (devices: any[]) => {
     console.log("HandleDisconnectedDevice end");
   } catch (err) {
     console.log(err);
-    throw err;
+    // throw err;
   }
 };
 
