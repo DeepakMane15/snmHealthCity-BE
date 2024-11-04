@@ -169,12 +169,12 @@ const HandleDisconnectedDevice = async (devices: any[]) => {
     //   .filter((d) => connected.includes(d.ip))
     //   .map((d) => d.ip);
 
-    let newDisconncted = [];
-    let newConnected:number[] = [];
+    let newDisconncted: any[] = [];
+    let newConnected: number[] = [];
 
     disconnected.forEach((d) => {
       if (!allDevices.find((a) => a.ip === d.ip)) {
-        newDisconncted.push(d.id);
+        newDisconncted.push({ deviceId: d.id });
       }
     });
 
@@ -184,10 +184,13 @@ const HandleDisconnectedDevice = async (devices: any[]) => {
       }
     });
 
-    await db('disconnected_devices')
-    .whereIn('id', newConnected)
-    .delete();
+    if (disconnected.length > 0) {
+      db("disconnected_devices").insert(newDisconncted);
+    }
 
+    if (newConnected.length > 0) {
+      db("disconnected_devices").whereIn("id", newConnected).delete();
+    }
   } catch (err) {
     console.log(err);
     throw err;
