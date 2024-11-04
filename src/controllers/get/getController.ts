@@ -94,6 +94,8 @@ const GetDeviceData = async (req: Request, res: Response) => {
         // console.log(response.data);
         const allDevices = response.data.result.data;
         // console.log(allDevices);
+        // handleDisconnectedDevices(allDevices);
+        getService.HandleDisconnectedDevice(allDevices);
         let returnData = allDevices;
         if(!req.body.requireCod) {
         coOrdinates.forEach(data => {
@@ -116,6 +118,7 @@ const GetDeviceData = async (req: Request, res: Response) => {
     console.log(err);
   }
 };
+
 
 export default {
   GetMethod,

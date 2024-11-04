@@ -153,7 +153,50 @@ const GetByIdMethod = async (input: any) => {
 };
 
 const GetDeviceCordinates = async () => {
-  return  await db("device_info").select("*");
+  return await db("device_info").select("*");
 };
 
-export default { GetMethod, GetByIdMethod, GetDeviceCordinates };
+const HandleDisconnectedDevice = async (devices: any[]) => {
+  try {
+    let disconnected = devices.filter((d) => d.status === 0);
+    let connected = devices.filter((d) => d.status === 1);
+
+    let allDevices = await db("disconnected_devices")
+      .select("d.id as id,d.ip as ip ,disconnected_devices.id as did")
+      .join("device_info as d", "d.id", "disconnected_devices.deviceId");
+
+    // let connectedIds = allDevices
+    //   .filter((d) => connected.includes(d.ip))
+    //   .map((d) => d.ip);
+
+    let newDisconncted = [];
+    let newConnected:number[] = [];
+
+    disconnected.forEach((d) => {
+      if (!allDevices.find((a) => a.ip === d.ip)) {
+        newDisconncted.push(d.id);
+      }
+    });
+
+    connected.forEach((c) => {
+      if (allDevices.find((a) => a.ip === c.ip)) {
+        newConnected.push(c.did);
+      }
+    });
+
+    await db('disconnected_devices')
+    .whereIn('id', newConnected)
+    .delete();
+
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
+
+export default {
+  GetMethod,
+  GetByIdMethod,
+  GetDeviceCordinates,
+  HandleDisconnectedDevice,
+};
