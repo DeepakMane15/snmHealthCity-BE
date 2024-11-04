@@ -188,7 +188,7 @@ const HandleDisconnectedDevice = async (devices: any[]) => {
       });
     } else {
       let ip = disconnected.map(d => d.ip);
-      let disconnectedIps = await db('devices_info').select('ip').whereIn('ip', ip);
+      let disconnectedIps = await db('device_info').select('ip').whereIn('ip', ip);
       console.log(disconnectedIps);
       disconnectedIps.forEach((d) => {
         newDisconncted.push({ deviceId: d.ip });
