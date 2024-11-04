@@ -100,6 +100,7 @@ const GetDeviceData = async (req: Request, res: Response) => {
           let device = allDevices.find((d: any) => d.mac === data.mac);
           if(device)
             data['status'] = device.status;
+            data['type'] = device.type;
         })
         returnData = coOrdinates
       }
