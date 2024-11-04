@@ -1,3 +1,4 @@
+import axios from "axios";
 import db from "../../db/knex"; // Adjust path to knex.ts
 
 const GetMethod = async (input: any) => {
@@ -160,8 +161,12 @@ const HandleDisconnectedDevice = async (devices: any[]) => {
   try {
     console.log("HandleDisconnectedDevice start");
     console.log(devices[0]);
-    let disconnected = devices.filter((d) => d.status === 0);
-    let connected = devices.filter((d) => d.status === 1);
+    const disconnected = devices.filter((d) => d.status === 0);
+    const connected = devices.filter((d) => d.status === 1);
+    const ip = disconnected.map((d) => d.ip);
+    const devicesIpsMaster = await db("device_info")
+      .select("id")
+      .whereIn("ip", ip);
 
     let allDevices = await db("disconnected_devices")
       .select("d.id as id,d.ip as ip ,disconnected_devices.id as did")
@@ -187,11 +192,9 @@ const HandleDisconnectedDevice = async (devices: any[]) => {
         }
       });
     } else {
-      let ip = disconnected.map(d => d.ip);
-      let disconnectedIps = await db('device_info').select('ip').whereIn('ip', ip);
-      console.log(disconnectedIps);
-      disconnectedIps.forEach((d) => {
-        newDisconncted.push({ deviceId: d.ip });
+      console.log(devicesIpsMaster);
+      devicesIpsMaster.forEach((d) => {
+        newDisconncted.push({ deviceId: d.id });
       });
     }
 
@@ -202,10 +205,32 @@ const HandleDisconnectedDevice = async (devices: any[]) => {
     if (newConnected.length > 0) {
       db("disconnected_devices").whereIn("id", newConnected).delete();
     }
+
+    let sendSmsDeviceList: any[] = [];
+    newDisconncted.forEach((d) => {
+      let device = devicesIpsMaster.find((i) => i.id === d.id);
+      sendSmsDeviceList.push(device);
+    });
+    handleSms(sendSmsDeviceList);
     console.log("HandleDisconnectedDevice end");
   } catch (err) {
     console.log(err);
     throw err;
+  }
+};
+
+const handleSms = async (devices: any[]) => {
+  const device = devices[0];
+  const url = `https://www.smsgatewayhub.com/api/mt/SendSMS?APIKey=M6DNgM6KxEK6yhadi9Rr6w&senderid=SNMAPP&channel=2&DCS=0&flashsms=0&number=918510005224&text=OTP%20for%20login%20is%2012345.%20-%20Sant%20Nirankari%20Mandal&route=2&EntityId=1301159066873503911&dlttemplateid=1307162564686077637`;
+
+  // Make the GET request to the SMS API
+  const response = await axios.get(url);
+
+  // Log success or failure based on the response
+  if (response.data && response.data.status === "success") {
+    console.log(`SMS sent successfully`);
+  } else {
+    console.log(`Failed to send SMS`);
   }
 };
 
