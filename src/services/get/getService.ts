@@ -222,8 +222,12 @@ const HandleDisconnectedDevice = async (devices: any[]) => {
 };
 
 const handleSms = async (devices: any[]) => {
-  const device = devices[0];
-  const url = `https://www.smsgatewayhub.com/api/mt/SendSMS?APIKey=M6DNgM6KxEK6yhadi9Rr6w&senderid=SNMAPP&channel=2&DCS=0&flashsms=0&number=918510005224&text=OTP%20for%20login%20is%2012345.%20-%20Sant%20Nirankari%20Mandal&route=2&EntityId=1301159066873503911&dlttemplateid=1307162564686077637`;
+  // const device = devices[0];
+  let text = "Following devices are disconnected : "
+  devices.forEach(element => {
+    text += ` ,${element.name}`;
+  });
+  const url = `https://www.smsgatewayhub.com/api/mt/SendSMS?APIKey=M6DNgM6KxEK6yhadi9Rr6w&senderid=SNMAPP&channel=2&DCS=0&flashsms=0&number=918510005224&text=${text}&route=2&EntityId=1301159066873503911&dlttemplateid=1307162564686077637`;
 
   // Make the GET request to the SMS API
   const response = await axios.get(url);
