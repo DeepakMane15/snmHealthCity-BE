@@ -198,8 +198,10 @@ const HandleDisconnectedDevice = async (devices: any[]) => {
       });
     }
 
-    if (disconnected.length > 0) {
-      db("disconnected_devices").insert(newDisconncted);
+    if (newDisconncted.length > 0) {
+      console.log("Inserting new disconnected devices...");
+      await db("disconnected_devices").insert(newDisconncted);
+      console.log("Insertion complete.");
     }
 
     // if (newConnected.length > 0) {
