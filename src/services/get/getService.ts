@@ -158,6 +158,8 @@ const GetDeviceCordinates = async () => {
 
 const HandleDisconnectedDevice = async (devices: any[]) => {
   try {
+    console.log("HandleDisconnectedDevice start");
+    console.log(devices[0]);
     let disconnected = devices.filter((d) => d.status === 0);
     let connected = devices.filter((d) => d.status === 1);
 
@@ -172,17 +174,26 @@ const HandleDisconnectedDevice = async (devices: any[]) => {
     let newDisconncted: any[] = [];
     let newConnected: number[] = [];
 
-    disconnected.forEach((d) => {
-      if (!allDevices.find((a) => a.ip === d.ip)) {
-        newDisconncted.push({ deviceId: d.id });
-      }
-    });
+    if (allDevices && allDevices.length > 0) {
+      disconnected.forEach((d) => {
+        if (!allDevices.find((a) => a.ip === d.ip)) {
+          newDisconncted.push({ deviceId: d.id });
+        }
+      });
 
-    connected.forEach((c) => {
-      if (allDevices.find((a) => a.ip === c.ip)) {
-        newConnected.push(c.did);
-      }
-    });
+      connected.forEach((c) => {
+        if (allDevices?.find((a) => a.ip === c.ip)) {
+          newConnected.push(c.did);
+        }
+      });
+    } else {
+      let ip = disconnected.map(d => d.ip);
+      let disconnectedIps = await db('devices_info').select('ip').whereIn('ip', ip);
+      console.log(disconnectedIps);
+      disconnectedIps.forEach((d) => {
+        newDisconncted.push({ deviceId: d.ip });
+      });
+    }
 
     if (disconnected.length > 0) {
       db("disconnected_devices").insert(newDisconncted);
@@ -191,6 +202,7 @@ const HandleDisconnectedDevice = async (devices: any[]) => {
     if (newConnected.length > 0) {
       db("disconnected_devices").whereIn("id", newConnected).delete();
     }
+    console.log("HandleDisconnectedDevice end");
   } catch (err) {
     console.log(err);
     throw err;
