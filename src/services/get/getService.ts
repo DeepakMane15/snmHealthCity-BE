@@ -202,9 +202,9 @@ const HandleDisconnectedDevice = async (devices: any[]) => {
       db("disconnected_devices").insert(newDisconncted);
     }
 
-    if (newConnected.length > 0) {
-      db("disconnected_devices").whereIn("id", newConnected).delete();
-    }
+    // if (newConnected.length > 0) {
+    //   db("disconnected_devices").whereIn("id", newConnected).delete();
+    // }
 
     let sendSmsDeviceList: any[] = [];
     newDisconncted.forEach((d) => {
@@ -225,6 +225,7 @@ const handleSms = async (devices: any[]) => {
 
   // Make the GET request to the SMS API
   const response = await axios.get(url);
+
 
   // Log success or failure based on the response
   if (response.data && response.data.status === "success") {
