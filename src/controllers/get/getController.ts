@@ -104,13 +104,13 @@ const GetDeviceData = async (req: Request, res: Response) => {
           let returnData = allDevices;
           if (!req.body.requireCod) {
             coOrdinates.forEach((data) => {
-              let deviceIndex = allDevices.findIndex(
+              let device = allDevices.find(
                 (d: any) => d.mac === data.mac
               );
-              if (deviceIndex) {
+              if (device) {
                 // allDevices[deviceIndex]["xAxis"] = data.xAxis;
                 // allDevices[deviceIndex]["yAxis"] = data.yAxis;
-                data['status'] = data.status
+                data['status'] = device.status
               }
             });
             returnData = coOrdinates;
