@@ -108,11 +108,12 @@ const GetDeviceData = async (req: Request, res: Response) => {
                 (d: any) => d.mac === data.mac
               );
               if (deviceIndex) {
-                allDevices[deviceIndex]["xAxis"] = data.xAxis;
-                allDevices[deviceIndex]["yAxis"] = data.yAxis;
+                // allDevices[deviceIndex]["xAxis"] = data.xAxis;
+                // allDevices[deviceIndex]["yAxis"] = data.yAxis;
+                data['status'] = data.status
               }
             });
-            returnData = allDevices;
+            returnData = coOrdinates;
           }
 
           return res.json(returnData);
