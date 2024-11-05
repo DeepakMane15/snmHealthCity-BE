@@ -94,7 +94,7 @@ const GetDeviceData = async (req: Request, res: Response) => {
       .request(config)
       .then((response) => {
         if (response.data.errorCode === -44112) {
-          return res.send(response.data);
+          return res.status(400).send(response.data);
         } else {
           // console.log(response.data);
           const allDevices = response.data.result.data;
