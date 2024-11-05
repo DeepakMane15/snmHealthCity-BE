@@ -71,7 +71,7 @@ const GetDeviceData = async (req: Request, res: Response) => {
       response_type: "code",
     });
 
-    console.log("first data "+ data);
+    console.log("first data " + data);
 
     const agent = new https.Agent({
       rejectUnauthorized: false, // Disable SSL certificate validation
@@ -93,27 +93,30 @@ const GetDeviceData = async (req: Request, res: Response) => {
     axios
       .request(config)
       .then((response) => {
-        console.log(response);
-        // console.log(response.data);
-        const allDevices = response.data.result.data;
-        // console.log(allDevices);
-        // handleDisconnectedDevices(allDevices);
-        getService.HandleDisconnectedDevice(allDevices);
-        let returnData = allDevices;
-        if (!req.body.requireCod) {
-          coOrdinates.forEach((data) => {
-            let deviceIndex = allDevices.findIndex(
-              (d: any) => d.mac === data.mac
-            );
-            if (deviceIndex) {
-              allDevices[deviceIndex]["xAxis"] = data.xAxis;
-              allDevices[deviceIndex]["yAxis"] = data.yAxis;
-            }
-          });
-          returnData = allDevices;
-        }
+        if (response.data.errorCode === -44112) {
+          return res.send(response.data);
+        } else {
+          // console.log(response.data);
+          const allDevices = response.data.result.data;
+          // console.log(allDevices);
+          // handleDisconnectedDevices(allDevices);
+          getService.HandleDisconnectedDevice(allDevices);
+          let returnData = allDevices;
+          if (!req.body.requireCod) {
+            coOrdinates.forEach((data) => {
+              let deviceIndex = allDevices.findIndex(
+                (d: any) => d.mac === data.mac
+              );
+              if (deviceIndex) {
+                allDevices[deviceIndex]["xAxis"] = data.xAxis;
+                allDevices[deviceIndex]["yAxis"] = data.yAxis;
+              }
+            });
+            returnData = allDevices;
+          }
 
-        return res.json(returnData);
+          return res.json(returnData);
+        }
       })
       .catch((error) => {
         console.log(error);
