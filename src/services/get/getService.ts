@@ -227,7 +227,7 @@ const handleSms = async (devices: any[]) => {
   devices.forEach(element => {
     text += ` ,${element.name}`;
   });
-  const url = `https://www.smsgatewayhub.com/api/mt/SendSMS?APIKey=M6DNgM6KxEK6yhadi9Rr6w&senderid=SNMAPP&channel=2&DCS=0&flashsms=0&number=918510005224&text=${text}&route=2&EntityId=1301159066873503911&dlttemplateid=1307162564686077637`;
+  const url = `https://www.smsgatewayhub.com/api/mt/SendSMS?APIKey=M6DNgM6KxEK6yhadi9Rr6w&senderid=SNMAPP&channel=2&DCS=0&flashsms=0&number=${process.env.SMS_NUMER}&text=${text}&route=2&EntityId=1301159066873503911&dlttemplateid=1307162564686077637`;
 
   // Make the GET request to the SMS API
   const response = await axios.get(url);
