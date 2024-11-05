@@ -117,6 +117,7 @@ const GetDeviceData = async (req: Request, res: Response) => {
     // console.log(deviceResponse);
   } catch (err) {
     console.log(err);
+    return res.json(err);
   }
 };
 
