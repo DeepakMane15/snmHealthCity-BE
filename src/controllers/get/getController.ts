@@ -93,6 +93,7 @@ const GetDeviceData = async (req: Request, res: Response) => {
     axios
       .request(config)
       .then((response) => {
+        console.log(response);
         // console.log(response.data);
         const allDevices = response.data.result.data;
         // console.log(allDevices);
