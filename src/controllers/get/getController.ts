@@ -12,66 +12,14 @@ const qs = require("qs");
 const httpsAgent = new https.Agent({
   rejectUnauthorized: false, // Disable SSL certificate validation
 });
-const GetMethod = async (req: Request, res: Response) => {
-  try {
-    const { type } = req.body;
-    let result: any = [];
-    logger.info(`Get Method start for type : ${type}`);
-    if (type === "10") {
-      result = await getDashboardData();
-    } else {
-      result = await getService.GetMethod(req.body);
-    }
-    logger.info(`Get Method Completed for type : ${type}`);
-    res
-      .status(200)
-      .json({ status: true, message: "Get successfully", data: result });
-  } catch (error) {
-    logger.error(`Get Method call failed with error: - ${error}`);
-    res.status(500).json({
-      status: false,
-      message: "An error occurred while getting results",
-    });
-  }
-};
-
-const getDashboardData = async () => {
-  let result = {
-    counts: await getService.GetMethod({ type: "10" }),
-    request: await getService.GetMethod({ type: "6" }),
-  };
-
-  return [result];
-};
-
-const GetByIdMethod = async (req: Request, res: Response) => {
-  try {
-    const { type } = req.body;
-    logger.info(`Get  By Id start for type : ${type}`);
-    const result = await getService.GetByIdMethod(req.body);
-    logger.info(`Get  By Id Completed for type : ${type}`);
-    res
-      .status(200)
-      .json({ status: true, message: "Get successfully", data: result });
-  } catch (error) {
-    logger.error(`Get  By Id call failed with error: - ${error}`);
-    res.status(500).json({
-      status: false,
-      message: "An error occurred while getting results",
-    });
-  }
-};
 
 const GetDeviceData = async (req: Request, res: Response) => {
   try {
     let coOrdinates = await getService.GetDeviceCordinates();
-    // console.log(coOrdinates);
 
     let data = qs.stringify({
       response_type: "code",
     });
-
-    console.log("first data " + data);
 
     const agent = new https.Agent({
       rejectUnauthorized: false, // Disable SSL certificate validation
@@ -96,21 +44,14 @@ const GetDeviceData = async (req: Request, res: Response) => {
         if (response.data.errorCode === -44112) {
           return res.status(400).send(response.data);
         } else {
-          // console.log(response.data);
           const allDevices = response.data.result.data;
-          // console.log(allDevices);
-          // handleDisconnectedDevices(allDevices);
-          getService.HandleDisconnectedDevice(allDevices);
+          getService.HandleDisconnectedDevice(allDevices, coOrdinates);
           let returnData = allDevices;
           if (!req.body.requireCod) {
             coOrdinates.forEach((data) => {
-              let device = allDevices.find(
-                (d: any) => d.mac === data.mac
-              );
+              let device = allDevices.find((d: any) => d.mac === data.mac);
               if (device) {
-                // allDevices[deviceIndex]["xAxis"] = data.xAxis;
-                // allDevices[deviceIndex]["yAxis"] = data.yAxis;
-                data['status'] = device.status
+                data["status"] = device.status;
               }
             });
             returnData = coOrdinates;
@@ -123,16 +64,31 @@ const GetDeviceData = async (req: Request, res: Response) => {
         console.log(error);
         return res.json(error);
       });
-
-    // console.log(deviceResponse);
   } catch (err) {
     console.log(err);
     return res.json(err);
   }
 };
 
+const PrtgList = async (req: Request, res: Response) => {
+  try {
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `http://prtg.snmitapps.org:5433/api/table.json?content=devices&columns=objid,probe,group,device,host&count=*&apiToken=RYU3DGV72XUZA6EROX3FTY46MXGI3KQN46ZVJ3GU3A======`,
+    };
+
+    axios.request(config).then((response) => {
+      console.log(response.data);
+
+      return res.json(response.data);
+    });
+  } catch (err) {
+    console.log(err);
+    return res.json(err);
+  }
+};
 export default {
-  GetMethod,
-  GetByIdMethod,
   GetDeviceData,
+  PrtgList
 };

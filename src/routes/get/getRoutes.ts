@@ -4,9 +4,8 @@ import getController from "../../controllers/get/getController";
 
 const router = express.Router();
 
-router.post("/", authorize, getController.GetMethod);
-
 router.post("/device-info", authorize, getController.GetDeviceData);
+router.get("/prtg-list", authorize, getController.PrtgList);
 
 
 export default router;
