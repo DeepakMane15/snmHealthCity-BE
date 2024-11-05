@@ -71,6 +71,8 @@ const GetDeviceData = async (req: Request, res: Response) => {
       response_type: "code",
     });
 
+    console.log("first data "+ data);
+
     const agent = new https.Agent({
       rejectUnauthorized: false, // Disable SSL certificate validation
     });
@@ -97,21 +99,24 @@ const GetDeviceData = async (req: Request, res: Response) => {
         // handleDisconnectedDevices(allDevices);
         getService.HandleDisconnectedDevice(allDevices);
         let returnData = allDevices;
-        if(!req.body.requireCod) {
-        coOrdinates.forEach(data => {
-          let deviceIndex = allDevices.findIndex((d: any) => d.mac === data.mac);
-          if(deviceIndex) {
-            allDevices[deviceIndex]['xAxis'] = data.xAxis;
-            allDevices[deviceIndex]['yAxis'] = data.yAxis;
-          }
-        })
-        returnData = allDevices
-      }
+        if (!req.body.requireCod) {
+          coOrdinates.forEach((data) => {
+            let deviceIndex = allDevices.findIndex(
+              (d: any) => d.mac === data.mac
+            );
+            if (deviceIndex) {
+              allDevices[deviceIndex]["xAxis"] = data.xAxis;
+              allDevices[deviceIndex]["yAxis"] = data.yAxis;
+            }
+          });
+          returnData = allDevices;
+        }
 
         return res.json(returnData);
       })
       .catch((error) => {
         console.log(error);
+        return res.json(error);
       });
 
     // console.log(deviceResponse);
@@ -120,7 +125,6 @@ const GetDeviceData = async (req: Request, res: Response) => {
     return res.json(err);
   }
 };
-
 
 export default {
   GetMethod,
