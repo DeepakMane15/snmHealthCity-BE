@@ -70,6 +70,16 @@ const GetDeviceData = async (req: Request, res: Response) => {
   }
 };
 
+// const updateDisconnectedDevices = async() => {
+//   try {
+//     let coOrdinates = await getService.GetDeviceCordinates();
+
+
+//   } catch (error) {
+//     console.error("Error updating disconnected devices:", error);
+//   }
+// }
+
 const PrtgList = async (req: Request, res: Response) => {
   try {
     let config = {
