@@ -83,7 +83,7 @@ const PrtgList = async (req: Request, res: Response) => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `http://prtg.snmitapps.org:5433/api/table.json?content=devices&columns=objid,probe,group,device,host&count=*&apiToken=RYU3DGV72XUZA6EROX3FTY46MXGI3KQN46ZVJ3GU3A======`,
+      url: `http://prtg.snmitapps.org:5433/api/table.json?content=devices&columns=objid,group,device,sensor,status,message,lastvalue,priority,favorite,host&count=*&apiToken=RYU3DGV72XUZA6EROX3FTY46MXGI3KQN46ZVJ3GU3A======`,
     };
 
     axios.request(config).then((response) => {
