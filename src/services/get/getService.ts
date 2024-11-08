@@ -1,7 +1,40 @@
 import axios from "axios";
 import db from "../../db/knex";
 
-const GetDeviceCordinates = async () => {
+const GetDeviceCordinates = async (allDevices: any[]) => {
+  await db.raw("DROP TEMPORARY TABLE IF EXISTS temp_all_devices");
+    await db.raw(`
+      CREATE TEMPORARY TABLE temp_all_devices (
+        name varchar(1000),
+        mac varchar(100),  
+        ip VARCHAR(15),
+        type varchar(100)
+      )
+    `);
+
+    const devicesToInsert = allDevices.map((device: any) => ({
+      name: device.name,
+      mac: device.mac,
+      ip: device.ip,
+      type: device.type,
+    }));
+
+    await db("temp_all_devices").insert(devicesToInsert);
+
+    await db.raw(`
+      DELETE dd FROM device_info dd
+      left join temp_all_devices t on t.ip = dd.ip
+      where t.ip is null
+    `);
+
+    await db.raw(`
+      insert into device_info (name,mac,ip,xAxis,yAxis,type)
+      select t.name, t.mac,t.ip,0,0,t.type
+      from temp_all_devices t
+      left join device_info d on d.ip = t.ip
+      where d.id is null;
+    `);
+
   return await db("device_info").select("*");
 };
 

@@ -15,8 +15,6 @@ const httpsAgent = new https.Agent({
 
 const GetDeviceData = async (req: Request, res: Response) => {
   try {
-    let coOrdinates = await getService.GetDeviceCordinates();
-
     let data = qs.stringify({
       response_type: "code",
     });
@@ -40,11 +38,12 @@ const GetDeviceData = async (req: Request, res: Response) => {
 
     axios
       .request(config)
-      .then((response) => {
+      .then(async (response) => {
         if (response.data.errorCode === -44112) {
           return res.status(400).send(response.data);
         } else {
           const allDevices = response.data.result.data;
+          let coOrdinates = await getService.GetDeviceCordinates(allDevices);
           getService.HandleDisconnectedDevice(allDevices, coOrdinates);
           let returnData = allDevices;
           if (!req.body.requireCod) {
