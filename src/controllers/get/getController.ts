@@ -87,7 +87,6 @@ const PrtgList = async (req: Request, res: Response) => {
     };
 
     axios.request(config).then((response) => {
-      console.log(response.data);
 
       return res.json(response.data);
     });
