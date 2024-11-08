@@ -3,7 +3,7 @@ import db from "../../db/knex";
 
 const GetDeviceCordinates = async (allDevices: any[]) => {
   await db.raw("DROP TEMPORARY TABLE IF EXISTS temp_all_devices");
-    await db.raw(`
+  await db.raw(`
       CREATE TEMPORARY TABLE temp_all_devices (
         name varchar(1000),
         mac varchar(100),  
@@ -12,22 +12,22 @@ const GetDeviceCordinates = async (allDevices: any[]) => {
       )
     `);
 
-    const devicesToInsert = allDevices.map((device: any) => ({
-      name: device.name,
-      mac: device.mac,
-      ip: device.ip,
-      type: device.type,
-    }));
+  const devicesToInsert = allDevices.map((device: any) => ({
+    name: device.name,
+    mac: device.mac,
+    ip: device.ip,
+    type: device.type,
+  }));
 
-    await db("temp_all_devices").insert(devicesToInsert);
+  await db("temp_all_devices").insert(devicesToInsert);
 
-    await db.raw(`
+  await db.raw(`
       DELETE dd FROM device_info dd
       left join temp_all_devices t on t.ip = dd.ip
       where t.ip is null
     `);
 
-    await db.raw(`
+  await db.raw(`
       insert into device_info (name,mac,ip,xAxis,yAxis,type)
       select t.name, t.mac,t.ip,0,0,t.type
       from temp_all_devices t
@@ -131,29 +131,47 @@ const handleSms = async (devices: any[]) => {
   }
 };
 
-const getAuthToken = async() => {
-  let token = await db("auth")
-  .select("*");
+const getAuthToken = async () => {
+  let token = await db("auth").select("*");
 
   return token;
-}
+};
 
-const saveAuthToken = async(accessToken:string, sessionId: string) => {
+const saveAuthToken = async (accessToken: string, sessionId: string) => {
   await db.raw(`
     truncate table auth;
   `);
 
   let data = {
     token: accessToken,
-    sessionId: sessionId
+    sessionId: sessionId,
+  };
+  await db("auth").insert(data);
+};
+
+const SaveCoordinates = async (
+  deviceId: number,
+  xAxis: number,
+  yAxis: number
+) => {
+  try {
+    let updateData = {
+      xAxis: xAxis,
+      yAxis: yAxis,
+    };
+    await db("device_info").where("id", deviceId).update(updateData);
+
+    return 1;
+  } catch (err) {
+    console.log(err);
+    return 0;
   }
-  await db("auth")
-  .insert(data);
-}
+};
 
 export default {
   GetDeviceCordinates,
   HandleDisconnectedDevice,
   getAuthToken,
-  saveAuthToken
+  saveAuthToken,
+  SaveCoordinates
 };

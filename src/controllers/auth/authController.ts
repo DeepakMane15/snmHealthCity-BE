@@ -34,7 +34,7 @@ const signin = async (req: Request, res: Response) => {
       // res
       //   .status(200)
       //   .json({ status: true, message: "Logged in successfully", data: data });
-      await omadaSignin(req, res);
+      await omadaSignin(req, res, data);
     } else {
       logger.debug(`Invalid username or password : ${username}`);
       res
@@ -49,7 +49,7 @@ const signin = async (req: Request, res: Response) => {
   }
 };
 
-const omadaSignin = async (req: Request, res: Response) => {
+const omadaSignin = async (req: Request, res: Response, userData:any) => {
   try {
     const username = "api-user";
     const password = "Snm@2024";
@@ -118,7 +118,7 @@ const omadaSignin = async (req: Request, res: Response) => {
       const { accessToken, refreshToken } = accessTokenResponse.data.result;
 
       // Return the tokens to the frontend
-      res.json({ accessToken, refreshToken, sessionId });
+      res.json({ accessToken, refreshToken, sessionId, userData });
     }
   } catch (err) {
     console.log(err);

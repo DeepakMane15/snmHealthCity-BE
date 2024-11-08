@@ -87,17 +87,12 @@ const PrtgList = async (req: Request, res: Response) => {
     };
 
     axios.request(config).then((response) => {
-
       return res.json(response.data);
     });
   } catch (err) {
     console.log(err);
     return res.json(err);
   }
-};
-export default {
-  GetDeviceData,
-  PrtgList,
 };
 
 export const GetDeviceDataCron = async () => {
@@ -172,7 +167,7 @@ export const GetDeviceDataCron = async () => {
         console.log(error);
         // return res.json(error);
       });
-      console.log("job finish");
+    console.log("job finish");
   } catch (err) {
     console.log(err);
     // return res.json(err);
@@ -256,4 +251,23 @@ const omadaSignin = async () => {
   } catch (err) {
     console.log(err);
   }
+};
+
+const SaveCoordinates = async (req: Request, res: Response) => {
+  try {
+    let {deviceId, xAxis, yAxis} = req.body;
+
+    let save = await getService.SaveCoordinates(deviceId,xAxis,yAxis);
+    if(save) {
+      return res.status(200).send({message:"Saved successfully"});
+    }
+  } catch (err) {
+
+  }
+};
+
+export default {
+  GetDeviceData,
+  PrtgList,
+  SaveCoordinates
 };
