@@ -72,7 +72,7 @@ const omadaSignin = async (req: Request, res: Response) => {
       },
       { httpsAgent }
     );
-    console.log(loginResponse);
+    // console.log(loginResponse);
     if (loginResponse.data.errorCode === -30109) {
       res.send({ status: 400, message: "Invalid Username or Password" });
     } else {
@@ -80,7 +80,7 @@ const omadaSignin = async (req: Request, res: Response) => {
       // console.log(loginResponse.data)
 
       const sessionId = loginResponse.data.result.sessionId;
-      console.log(sessionId);
+      // console.log(sessionId);
       // console.log(csrfToken, sessionId);
 
       // Step 3: Call GetAuthToken with CSRF token and session ID
@@ -99,7 +99,7 @@ const omadaSignin = async (req: Request, res: Response) => {
 
       // Step 4: Extract the authorization code from the response
       const { result } = authTokenResponse.data;
-      console.log(authTokenResponse.data);
+      // console.log(authTokenResponse.data);
 
       // Step 5: Call GetAccessToken with the authorization code
       let data = {
@@ -114,7 +114,7 @@ const omadaSignin = async (req: Request, res: Response) => {
       );
 
       // Step 6: Extract the access and refresh tokens
-      console.log(accessTokenResponse.data);
+      // console.log(accessTokenResponse.data);
       const { accessToken, refreshToken } = accessTokenResponse.data.result;
 
       // Return the tokens to the frontend

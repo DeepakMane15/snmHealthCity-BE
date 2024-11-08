@@ -131,7 +131,29 @@ const handleSms = async (devices: any[]) => {
   }
 };
 
+const getAuthToken = async() => {
+  let token = await db("auth")
+  .select("*");
+
+  return token;
+}
+
+const saveAuthToken = async(accessToken:string, sessionId: string) => {
+  await db.raw(`
+    truncate table auth;
+  `);
+
+  let data = {
+    token: accessToken,
+    sessionId: sessionId
+  }
+  await db("auth")
+  .insert(data);
+}
+
 export default {
   GetDeviceCordinates,
   HandleDisconnectedDevice,
+  getAuthToken,
+  saveAuthToken
 };
