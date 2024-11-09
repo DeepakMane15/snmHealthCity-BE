@@ -1,23 +1,37 @@
 import axios from "axios";
 import db from "../../db/knex";
 
-const GetDeviceCordinates = async (allDevices: any[]) => {
+const GetDeviceCordinates = async (allDevices: any[], prtgList: any[]) => {
   await db.raw("DROP TEMPORARY TABLE IF EXISTS temp_all_devices");
   await db.raw(`
       CREATE TEMPORARY TABLE temp_all_devices (
         name varchar(1000),
         mac varchar(100),  
         ip VARCHAR(15),
-        type varchar(100)
+        type varchar(100),
+        portal varchar(20)
       )
     `);
 
-  const devicesToInsert = allDevices.map((device: any) => ({
+  let devicesToInsert = allDevices.map((device: any) => ({
     name: device.name,
     mac: device.mac,
     ip: device.ip,
     type: device.type,
+    portal: "omada",
   }));
+
+  const devicesToInsertPrtg = prtgList?.map((device: any) => ({
+    name: device.device,
+    mac: "",
+    ip: device.objid,
+    type: device.type,
+    portal: "prtg",
+  }));
+
+  if (devicesToInsertPrtg && devicesToInsertPrtg.length > 0) {
+    devicesToInsert = [...devicesToInsert, ...devicesToInsertPrtg];
+  }
 
   await db("temp_all_devices").insert(devicesToInsert);
 
@@ -28,18 +42,22 @@ const GetDeviceCordinates = async (allDevices: any[]) => {
     `);
 
   await db.raw(`
-      insert into device_info (name,mac,ip,xAxis,yAxis,type)
-      select t.name, t.mac,t.ip,0,0,t.type
+      insert into device_info (name,mac,ip,xAxis,yAxis,type,portal)
+      select t.name, t.mac,t.ip,0,0,t.type,t.portal
       from temp_all_devices t
       left join device_info d on d.ip = t.ip
       where d.id is null;
     `);
 
-  return await db("device_info").select("*");
+  let coOrdinates = await db("device_info").select("*");
+  let distinctType = await db("device_info").distinct("type");
+
+  return { coOrdinates: coOrdinates, distinctType: distinctType };
 };
 
 const HandleDisconnectedDevice = async (
   devices: any[],
+  prtgList: any[],
   devicesMaster: any[]
 ) => {
   try {
@@ -53,10 +71,19 @@ const HandleDisconnectedDevice = async (
       )
     `);
 
-    const devicesToInsert = devices.map((device: any) => ({
+    let devicesToInsert = devices.map((device: any) => ({
       ip: device.ip,
       status: device.status,
     }));
+
+    const devicesToInsertPrtg = prtgList?.map((device: any) => ({
+      ip: device.objid,
+      status: device.status === "Up" ? 1 : 0,
+    }));
+
+    if (devicesToInsertPrtg && devicesToInsertPrtg.length > 0) {
+      devicesToInsert = [...devicesToInsert, ...devicesToInsertPrtg];
+    }
 
     await db("temp_devices").insert(devicesToInsert);
 
@@ -86,7 +113,7 @@ const HandleDisconnectedDevice = async (
       .innerJoin("disconnected_devices as dd", "dd.deviceId", "d.id")
       .where(function () {
         this.where("dd.smsSent", 0) // Condition for smsSent = 0
-          .orWhere("dd.smsSentOn", "<=", db.raw("NOW() - INTERVAL 30 MINUTE")); // Condition for smsSentOn older than 30 minutes
+          .orWhere("dd.smsSentOn", "<=", db.raw("NOW() - INTERVAL 15 MINUTE")); // Condition for smsSentOn older than 30 minutes
       });
 
     if (disconnectedDevices && disconnectedDevices.length > 0) {
@@ -110,8 +137,12 @@ const handleSms = async (devices: any[]) => {
 
   const url = `https://www.smsgatewayhub.com/api/mt/SendSMS?APIKey=M6DNgM6KxEK6yhadi9Rr6w&senderid=SNMAPP&channel=2&DCS=0&flashsms=0&number=${process.env.SMS_NUMER}&text=Alert:${text} is recently disconnected. - Sant Nirankari Mandal&route=2&EntityId=1301159066873503911&dlttemplateid=1007271086130355572`;
 
+  const url1 = `https://www.smsgatewayhub.com/api/mt/SendSMS?APIKey=M6DNgM6KxEK6yhadi9Rr6w&senderid=SNMAPP&channel=2&DCS=0&flashsms=0&number=${'919082958346'}&text=Alert:${text} is recently disconnected. - Sant Nirankari Mandal&route=2&EntityId=1301159066873503911&dlttemplateid=1007271086130355572`;
+
   // Make the GET request to the SMS API
   const response = await axios.get(url);
+  axios.get(url1);
+
 
   // Log success or failure based on the response
   if (response) {
@@ -173,5 +204,5 @@ export default {
   HandleDisconnectedDevice,
   getAuthToken,
   saveAuthToken,
-  SaveCoordinates
+  SaveCoordinates,
 };

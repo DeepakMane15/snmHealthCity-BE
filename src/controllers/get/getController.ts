@@ -43,20 +43,27 @@ const GetDeviceData = async (req: Request, res: Response) => {
           return res.status(400).send(response.data);
         } else {
           const allDevices = response.data.result.data;
-          let coOrdinates = await getService.GetDeviceCordinates(allDevices);
-          getService.HandleDisconnectedDevice(allDevices, coOrdinates);
-          let returnData = allDevices;
+          const prtgList:any[] = await PrtgListApiCall();
+          let {coOrdinates, distinctType} = await getService.GetDeviceCordinates(allDevices, prtgList);
+          // getService.HandleDisconnectedDevice(allDevices, coOrdinates);
+          let finalDeviceData = allDevices;
           if (!req.body.requireCod) {
             coOrdinates.forEach((data) => {
-              let device = allDevices.find((d: any) => d.mac === data.mac);
+              let device = allDevices.find((d: any) => d.ip === data.ip && data.portal === 'omada');
               if (device) {
                 data["status"] = device.status;
               }
+              else {
+                let device = prtgList?.find((d: any) => d.objid == data.ip && data.portal === 'prtg');
+                if (device) {
+                  data["status"] = device.status === 'Up' ? 1 : 0;
+                }
+              }
             });
-            returnData = coOrdinates;
+            finalDeviceData = coOrdinates;
           }
 
-          return res.json(returnData);
+          return res.json({finalDeviceData, distinctType});
         }
       })
       .catch((error) => {
@@ -80,18 +87,30 @@ const GetDeviceData = async (req: Request, res: Response) => {
 
 const PrtgList = async (req: Request, res: Response) => {
   try {
-    let config = {
-      method: "get",
-      maxBodyLength: Infinity,
-      url: `http://prtg.snmitapps.org:5433/api/table.json?content=devices&columns=objid,group,device,sensor,status,message,lastvalue,priority,favorite,host&count=*&apiToken=RYU3DGV72XUZA6EROX3FTY46MXGI3KQN46ZVJ3GU3A======`,
-    };
-
-    axios.request(config).then((response) => {
-      return res.json(response.data);
-    });
+    let prtgList = await PrtgListApiCall();
+    return res.json({devices:prtgList});
   } catch (err) {
     console.log(err);
     return res.json(err);
+  }
+};
+
+const PrtgListApiCall = async ():Promise<any> => {
+  try {
+    console.log("fetching prtg list");
+    let config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `http://prtg.snmitapps.org:5433/api/table.json?content=devices&columns=objid,group,device,sensor,status,message,lastvalue,priority,favorite,host,type&count=*&apiToken=RYU3DGV72XUZA6EROX3FTY46MXGI3KQN46ZVJ3GU3A======`,
+    };
+
+    const response = await axios.request<any>(config); // Specify response type here
+    console.log("fetched prtg list");
+    return response.data.devices;
+  } catch (err) {
+    console.log("error fetching prtg list");
+    console.log(err);
+    return err;
   }
 };
 
@@ -157,10 +176,12 @@ export const GetDeviceDataCron = async () => {
           // return res.status(400).send(response.data);
           // login again and generate the tokens
         } else {
-          console.log("got devices");
+          // console.log("got devices");
           const allDevices = response.data.result.data;
-          let coOrdinates = await getService.GetDeviceCordinates(allDevices);
-          getService.HandleDisconnectedDevice(allDevices, coOrdinates);
+          // fetch prtg list
+          const prtgList:any[] = await PrtgListApiCall();
+          let {coOrdinates, distinctType}  = await getService.GetDeviceCordinates(allDevices, prtgList);
+          getService.HandleDisconnectedDevice(allDevices,prtgList, coOrdinates);
         }
       })
       .catch((error) => {
@@ -255,19 +276,17 @@ const omadaSignin = async () => {
 
 const SaveCoordinates = async (req: Request, res: Response) => {
   try {
-    let {deviceId, xAxis, yAxis} = req.body;
+    let { deviceId, xAxis, yAxis } = req.body;
 
-    let save = await getService.SaveCoordinates(deviceId,xAxis,yAxis);
-    if(save) {
-      return res.status(200).send({message:"Saved successfully"});
+    let save = await getService.SaveCoordinates(deviceId, xAxis, yAxis);
+    if (save) {
+      return res.status(200).send({ message: "Saved successfully" });
     }
-  } catch (err) {
-
-  }
+  } catch (err) {}
 };
 
 export default {
   GetDeviceData,
   PrtgList,
-  SaveCoordinates
+  SaveCoordinates,
 };
