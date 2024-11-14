@@ -26,7 +26,7 @@ const GetDeviceData = async (req: Request, res: Response) => {
     let config = {
       method: "get",
       maxBodyLength: Infinity,
-      url: `${process.env.REACT_APP_OMADA_BASE_URL}openapi/v1/${process.env.REACT_APP_OMADA_ID}/sites/${process.env.REACT_APP_SITE_ID}/devices?page=1&pageSize=80`,
+      url: `${process.env.REACT_APP_OMADA_BASE_URL}openapi/v1/${process.env.REACT_APP_OMADA_ID}/sites/${process.env.REACT_APP_SITE_ID}/devices?page=1&pageSize=800`,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `AccessToken=${req.body.token}`,
@@ -43,6 +43,7 @@ const GetDeviceData = async (req: Request, res: Response) => {
           return res.status(400).send(response.data);
         } else {
           const allDevices = response.data.result.data;
+          
           const prtgList:any[] = await PrtgListApiCall();
           let {coOrdinates, distinctType} = await getService.GetDeviceCordinates(allDevices, prtgList);
           // getService.HandleDisconnectedDevice(allDevices, coOrdinates);
