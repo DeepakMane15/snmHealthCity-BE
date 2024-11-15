@@ -109,7 +109,7 @@ const HandleDisconnectedDevice = async (
     `);
 
     let disconnectedDevices = await db("device_info as d")
-      .select("d.ip", "d.name", "dd.id")
+      .select("d.ip", "d.name", "dd.id", "d.type")
       .innerJoin("disconnected_devices as dd", "dd.deviceId", "d.id")
       .where(function () {
         this.where("dd.smsSent", 0) // Condition for smsSent = 0
@@ -131,35 +131,45 @@ const handleSms = async (devices: any[]) => {
   // const device = devices[0];
   let text = "";
   devices.forEach((element, index) => {
-    text += ` ${index > 0 ? "," : ""} ${element?.name}`;
-  });
-  // const url = `https://www.smsgatewayhub.com/api/mt/SendSMS?APIKey=M6DNgM6KxEK6yhadi9Rr6w&senderid=SNMAPP&channel=2&DCS=0&flashsms=0&number=${process.env.SMS_NUMER}&text=${text}&route=2&EntityId=1301159066873503911&dlttemplateid=1307162564686077637`;
+    // text += ` ${index > 0 ? "," : ""} ${element?.name}`;
+    let type = element.type;
+    if(type === 'ap') 
+      type = 'AP';
+    else if(type === 'switch')
+      type = 'Switch';
 
-  const url = `https://www.smsgatewayhub.com/api/mt/SendSMS?APIKey=M6DNgM6KxEK6yhadi9Rr6w&senderid=SNMAPP&channel=2&DCS=0&flashsms=0&number=${process.env.SMS_NUMER}&text=Alert:${text} is recently disconnected. - Sant Nirankari Mandal&route=2&EntityId=1301159066873503911&dlttemplateid=1007271086130355572`;
+    text = `Alert: ${type} : ${element.name} (${element.ip}) is recently disconnected. - Sant Nirankari Mandal`;
 
-  const url1 = `https://www.smsgatewayhub.com/api/mt/SendSMS?APIKey=M6DNgM6KxEK6yhadi9Rr6w&senderid=SNMAPP&channel=2&DCS=0&flashsms=0&number=${process.env.SMS_NUMER2}&text=Alert:${text} is recently disconnected. - Sant Nirankari Mandal&route=2&EntityId=1301159066873503911&dlttemplateid=1007271086130355572`;
+    const url = `https://www.smsgatewayhub.com/api/mt/SendSMS?APIKey=M6DNgM6KxEK6yhadi9Rr6w&senderid=SNMAPP&channel=2&DCS=0&flashsms=0&number=${process.env.SMS_NUMER}&text=${text}&route=2&EntityId=1301159066873503911&dlttemplateid=1007271086130355572`;
 
+    const url1 = `https://www.smsgatewayhub.com/api/mt/SendSMS?APIKey=M6DNgM6KxEK6yhadi9Rr6w&senderid=SNMAPP&channel=2&DCS=0&flashsms=0&number=${process.env.SMS_NUMER2}&text=${text}&route=2&EntityId=1301159066873503911&dlttemplateid=1007271086130355572`;
+
+    
   // Make the GET request to the SMS API
-  const response = await axios.get(url);
+  const response = axios.get(url);
   axios.get(url1);
 
 
   // Log success or failure based on the response
-  if (response) {
-    console.log("sms sent");
-    let idsToUpdate = devices.map((d) => d.id);
+  // if (response) {
+  //   console.log("sms sent");
+    
+  // } else {
+  //   console.log(`Failed to send SMS`);
+  // }
+  });
+
+  let idsToUpdate = devices.map((d) => d.id);
     if (idsToUpdate.length > 0) {
       // Step 3: Update the disconnected_devices table
-      await db("disconnected_devices")
+      db("disconnected_devices")
         .whereIn("id", idsToUpdate) // Where ID is one of the extracted IDs
         .update({
           smsSent: 1, // Set smsSent to 1
           smsSentOn: db.fn.now(), // Set smsSentOn to the current datetime
         });
     }
-  } else {
-    console.log(`Failed to send SMS`);
-  }
+  
 };
 
 const getAuthToken = async () => {
