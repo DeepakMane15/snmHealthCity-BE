@@ -113,7 +113,7 @@ const HandleDisconnectedDevice = async (
       .innerJoin("disconnected_devices as dd", "dd.deviceId", "d.id")
       .where(function () {
         this.where("dd.smsSent", 0) // Condition for smsSent = 0
-          .orWhere("dd.smsSentOn", "<=", db.raw("NOW() - INTERVAL 15 MINUTE")); // Condition for smsSentOn older than 30 minutes
+          .orWhere("dd.smsSentOn", "<=", db.raw("NOW() - INTERVAL 30 MINUTE")); // Condition for smsSentOn older than 30 minutes
       });
 
     if (disconnectedDevices && disconnectedDevices.length > 0) {
