@@ -160,15 +160,19 @@ const handleSms = async (devices: any[]) => {
   });
 
   let idsToUpdate = devices.map((d) => d.id);
-    if (idsToUpdate.length > 0) {
-      // Step 3: Update the disconnected_devices table
-      db("disconnected_devices")
-        .whereIn("id", idsToUpdate) // Where ID is one of the extracted IDs
-        .update({
-          smsSent: 1, // Set smsSent to 1
-          smsSentOn: db.fn.now(), // Set smsSentOn to the current datetime
-        });
+  try {
+    if(idsToUpdate.length > 0) {
+    const updatedCount = await db("disconnected_devices")
+      .whereIn("id", idsToUpdate)
+      .update({
+        smsSent: 1,
+        smsSentOn: db.fn.now(),
+      });
+    console.log(`SMS sent for ${updatedCount} devices`);
     }
+  } catch (error:any) {
+    console.error("Error updating database:", error.message);
+  }
   
 };
 
