@@ -133,10 +133,8 @@ const handleSms = async (devices: any[]) => {
   devices.forEach((element, index) => {
     // text += ` ${index > 0 ? "," : ""} ${element?.name}`;
     let type = element.type;
-    if(type === 'ap') 
-      type = 'AP';
-    else if(type === 'switch')
-      type = 'Switch';
+    if (type === "ap") type = "AP";
+    else if (type === "switch") type = "Switch";
 
     text = `Alert: ${type} : ${element.name} (${element.ip}) is recently disconnected. - Sant Nirankari Mandal`;
 
@@ -144,36 +142,33 @@ const handleSms = async (devices: any[]) => {
 
     const url1 = `https://www.smsgatewayhub.com/api/mt/SendSMS?APIKey=M6DNgM6KxEK6yhadi9Rr6w&senderid=SNMAPP&channel=2&DCS=0&flashsms=0&number=${process.env.SMS_NUMER2}&text=${text}&route=2&EntityId=1301159066873503911&dlttemplateid=1007271086130355572`;
 
-    
-  // Make the GET request to the SMS API
-  const response = axios.get(url);
-  axios.get(url1);
+    // Make the GET request to the SMS API
+    const response = axios.get(url);
+    axios.get(url1);
 
+    // Log success or failure based on the response
+    // if (response) {
+    //   console.log("sms sent");
 
-  // Log success or failure based on the response
-  // if (response) {
-  //   console.log("sms sent");
-    
-  // } else {
-  //   console.log(`Failed to send SMS`);
-  // }
+    // } else {
+    //   console.log(`Failed to send SMS`);
+    // }
   });
 
   let idsToUpdate = devices.map((d) => d.id);
   try {
-    if(idsToUpdate.length > 0) {
-    const updatedCount = await db("disconnected_devices")
-      .whereIn("id", idsToUpdate)
-      .update({
-        smsSent: 1,
-        smsSentOn: db.fn.now(),
-      });
-    console.log(`SMS sent for ${updatedCount} devices`);
+    if (idsToUpdate.length > 0) {
+      const updatedCount = await db("disconnected_devices")
+        .whereIn("id", idsToUpdate)
+        .update({
+          smsSent: 1,
+          smsSentOn: db.fn.now(),
+        });
+      console.log(`SMS sent for ${updatedCount} devices`);
     }
-  } catch (error:any) {
+  } catch (error: any) {
     console.error("Error updating database:", error.message);
   }
-  
 };
 
 const getAuthToken = async () => {
@@ -213,10 +208,65 @@ const SaveCoordinates = async (
   }
 };
 
+const updateClientNo = async (clientData: any) => {
+  try {
+    console.log("updating client no");
+    await db.raw(`drop table if exists _clientData`);
+    await db.raw(`create table _clientData (mac varchar(100), clients int)`);
+
+    const apMacOccurrences: any = {};
+    clientData.forEach((device: any) => {
+      if (apMacOccurrences[device.apMac]) {
+        apMacOccurrences[device.apMac]++;
+      } else {
+        apMacOccurrences[device.apMac] = 1;
+      }
+    });
+
+    // Step 2: Transform the counts into an array of objects
+    const result = Object.keys(apMacOccurrences).map((apMac) => ({
+      mac: apMac,
+      clients: apMacOccurrences[apMac],
+    }));
+
+    await db("_clientData").insert(result);
+
+    await db.raw(`
+      UPDATE device_info d
+      INNER JOIN _clientData c ON c.mac = d.mac
+      SET d.clientsNo = c.clients;
+      `);
+  } catch (err) {
+    console.log(err);
+    return 0;
+  }
+};
+
+const getClientsNoOfDevices = async (data:any) => {
+  try {
+    console.log("updating client no into db");
+    let clientData = await db("device_info").select("*").where("portal","omada");
+    if(clientData) {
+      data.forEach((d: any) => {
+        let clientNo = clientData.find((dt: any) => dt.mac === d.mac);
+        if(clientNo)
+          d.clients = clientNo.clientsNo;
+      })
+    }
+
+    // return data;
+    console.log("updated client no into db");
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 export default {
   GetDeviceCordinates,
   HandleDisconnectedDevice,
   getAuthToken,
   saveAuthToken,
   SaveCoordinates,
+  updateClientNo,
+  getClientsNoOfDevices
 };

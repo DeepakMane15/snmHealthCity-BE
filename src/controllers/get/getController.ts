@@ -63,6 +63,9 @@ const GetDeviceData = async (req: Request, res: Response) => {
             });
             finalDeviceData = coOrdinates;
           }
+          else {
+            await getService.getClientsNoOfDevices(finalDeviceData);
+          }
 
           return res.json({finalDeviceData, distinctType});
         }
@@ -168,7 +171,7 @@ export const GetDeviceDataCron = async () => {
           console.log("expired token, signing in again");
           let tokens: any = await omadaSignin();
           if (tokens) {
-            GetDeviceDataCron();
+            await GetDeviceDataCron();
             return;
           } else {
             return;
@@ -183,6 +186,7 @@ export const GetDeviceDataCron = async () => {
           const prtgList:any[] = await PrtgListApiCall();
           let {coOrdinates, distinctType}  = await getService.GetDeviceCordinates(allDevices, prtgList);
           getService.HandleDisconnectedDevice(allDevices,prtgList, coOrdinates);
+          await GetClientsData(token, sessionId);
         }
       })
       .catch((error) => {
@@ -195,6 +199,53 @@ export const GetDeviceDataCron = async () => {
     // return res.json(err);
   }
 };
+
+const GetClientsData = async(token: string, sessionId:string) => {
+  try {
+    console.log("starting client data fetch")
+    const agent = new https.Agent({
+      rejectUnauthorized: false, // Disable SSL certificate validation
+    });
+    const pageSize = 1000;
+    let clients:any = [];
+    let currentPage = 1;
+    while (true) {
+      let config = {
+        method: "get",
+        maxBodyLength: Infinity,
+        url: `${process.env.REACT_APP_OMADA_BASE_URL}openapi/v1/${process.env.REACT_APP_OMADA_ID}/sites/${process.env.REACT_APP_SITE_ID}/clients?page=${currentPage}&pageSize=${pageSize}`,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `AccessToken=${token}`,
+          Cookie: `TPOMADA_SESSIONID=${sessionId}`,
+        },
+        httpsAgent: agent,
+      };
+      const response = await axios.request(config);
+
+      if (response.data?.result) {
+        console.log("first call completed")
+        // Append fetched clients to the list
+        clients = clients.concat(response.data.result.data);
+
+        // Break if there are no more clients
+        if (response.data.result.data.length < pageSize) {
+          break;
+        }
+        console.log("starting call for next page");
+        // Move to the next page
+        currentPage++;
+      } else {
+        // Break if no data is returned
+        break;
+      }
+    }
+    getService.updateClientNo(clients);
+  }
+  catch (error: any) {
+    console.error('Error fetching clients:', error.message);
+}
+}
 
 const omadaSignin = async () => {
   try {
