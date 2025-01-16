@@ -14,8 +14,9 @@ const GetMethod = async (input: any) => {
     res = await query.orderBy("id", "desc");
   } else if (input.type === "2") {
     res = await db("vehicle as v")
-      .select("v.*", "a.reading", "a.total_fuel")
+      .select("v.*", "a.reading", "a.total_fuel", "s.date as recent_date")
       .leftJoin("snm_vehicle_average as a", "a.vehicle", "v.id")
+      .leftJoin("snm_vehicle_inout as s", "s.vehicle_id", "v.id")
       .where("v.is_active", 1)
       .where("isDeleted", 0)
       .groupBy("v.id")
@@ -107,7 +108,14 @@ const GetByIdMethod = async (input: any) => {
       .where({ is_active: 1, id: input.id, isDeleted: 0 })
       .first();
   } else if (input.type === "2") {
-    res = await db("vehicle").where({ is_active: 1, isDeleted: 0 });
+    // res = await db("vehicle").where({ id:input.vehicle, is_active: 1, isDeleted: 0 });
+    res = await db("vehicle as v")
+      .select("v.*", "a.reading", "a.total_fuel", "s.date as recent_date")
+      .leftJoin("snm_vehicle_average as a", "a.vehicle", "v.id")
+      .leftJoin("snm_vehicle_inout as s", "s.vehicle_id", "v.id")
+      // .where("v.is_active", 1)
+      // .where("isDeleted", 0)
+      .where("v.id", input.vehicle);
   } else if (input.type === "3") {
     res = await db("snm_fuel_inward").select("*").where("isDeleted", 0);
   } else if (input.type === "4") {
