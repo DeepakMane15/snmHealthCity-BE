@@ -110,7 +110,7 @@ const GetByIdMethod = async (input: any) => {
   } else if (input.type === "2") {
     // res = await db("vehicle").where({ id:input.vehicle, is_active: 1, isDeleted: 0 });
     res = await db("vehicle as v")
-      .select("v.*", "a.reading", "a.total_fuel", "s.date as recent_date")
+      .select("v.*", "s.km as present_km", "a.reading", "a.total_fuel", "s.date as recent_date")
       .leftJoin("snm_vehicle_average as a", "a.vehicle", "v.id")
       .leftJoin("snm_vehicle_inout as s", "s.vehicle_id", "v.id")
       // .where("v.is_active", 1)
