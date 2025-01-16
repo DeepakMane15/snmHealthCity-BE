@@ -84,6 +84,7 @@ const saveMethod = async (input: any, pic = "") => {
             refill_to: input.vehicle,
             present_km: input.present_km
         };
+        console.log(data);
         res = await db('snm_fuel_inward').insert(data);
 
         // Update vehicle average logic
