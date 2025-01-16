@@ -9,7 +9,8 @@ const SaveMethod = async (req: Request, res: Response) => {
     const result = await saveService.saveMethod(req.body);
     logger.info(`Save Method Completed for type : ${type}`);
     res.status(200).json({ status: true, message: "Get successfully", data: result });
-  } catch (error) {
+  } catch (error: any) {
+    console.log(error.message);
     logger.error(`Save Method call failed with error: - ${error}`);
     res.status(500).json({ status: false, message: "An error occurred while getting results" });
   }
