@@ -14,7 +14,7 @@ const GetMethod = async (input: any) => {
     res = await query.orderBy("id", "desc");
   } else if (input.type === "2") {
     res = await db("vehicle as v")
-      .select("v.*", "a.reading", "a.total_fuel", "s.date as recent_date")
+      .select("v.*", "a.reading", "a.total_fuel", "s.date as recent_date", "s.present_km as present_km")
       .leftJoin("snm_vehicle_average as a", "a.vehicle", "v.id")
       .leftJoin("snm_vehicle_inout as s", "s.vehicle_id", "v.id")
       .where("v.is_active", 1)
