@@ -22,10 +22,11 @@ const GetMethod = async (input: any) => {
       .groupBy("v.id")
       .orderBy("v.id", "desc");
   } else if (input.type === "3") {
-    res = await db("snm_fuel_inward")
-      .select("*")
-      .where("isDeleted", 0)
-      .orderBy("id", "desc");
+    res = await db("snm_fuel_inward as s")
+      .select("s.*", "v.registeration_no as vehicle")
+      .innerJoin("vehicle as v", "v.id", "s.refill_to")
+      .where("s.isDeleted", 0)
+      .orderBy("s.id", "desc");
   } else if (input.type === "4") {
     res = await db("impressed_ac as i")
       .select(
